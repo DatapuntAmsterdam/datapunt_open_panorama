@@ -1,6 +1,8 @@
 import io
+import os
 
 from numpy import squeeze, dsplit, dstack, array
+from pathlib import Path
 from scipy import misc
 from scipy.ndimage import map_coordinates
 from PIL import Image, ImageOps
@@ -148,13 +150,21 @@ def save_image(image, name, in_panorama_store=False):
     :param name: path to save the image at
     :param in_panorama_store: flag for choosing specific store
     """
-    byte_array = io.BytesIO()
-    image.save(byte_array, format='JPEG', optimize=True, progressive=True)
-    if in_panorama_store:
-        container, name = name.split('/')[0], '/'.join(name.split('/')[1:])
-        object_store.put_into_panorama_store(container, name, byte_array.getvalue(), 'image/jpeg')
+
+    if True:
+        blurred_base = '/Users/bart/Development/datapunt/github.com/panorama/blurred'
+        path = os.path.join(blurred_base, name)
+        Path(os.path.dirname(path)).mkdir(parents=True, exist_ok=True)
+        image.save(path, format='JPEG', optimize=True, progressive=True)
+
     else:
-        object_store.put_into_datapunt_store(name, byte_array.getvalue(), 'image/jpeg')
+        byte_array = io.BytesIO()
+        image.save(byte_array, format='JPEG', optimize=True, progressive=True)
+        if in_panorama_store:
+            container, name = name.split('/')[0], '/'.join(name.split('/')[1:])
+            object_store.put_into_panorama_store(container, name, byte_array.getvalue(), 'image/jpeg')
+        else:
+            object_store.put_into_datapunt_store(name, byte_array.getvalue(), 'image/jpeg')
 
 
 def save_array_image(array_img, name, in_panorama_store=False):
